@@ -1,6 +1,12 @@
 import { defaultSnapOrigin } from '../config';
 import { GetSnapsResponse, Snap } from '../types';
 
+interface TransactionsInterface {
+  id: number,
+  address: string,
+  amount: string
+}
+
 /**
  * Get the installed snaps in MetaMask.
  *
@@ -56,20 +62,43 @@ export const getSnap = async (version?: string): Promise<Snap | undefined> => {
   }
 };
 
-/**
- * Invoke the "hello" method from the example snap.
- */
+export const connectEOA = async (): Promise<string> => {
+  const address = (await window.ethereum.request({
+    method: 'wallet_invokeSnap',
+    params: [
+      defaultSnapOrigin,
+      {
+        method: 'connect_eoa',
+      },
+    ],
+  })) as string;
+  return address;
+};
 
-export const sendHello = async () => {
+export const connectAA = async (): Promise<string> => {
+  const address = (await window.ethereum.request({
+    method: 'wallet_invokeSnap',
+    params: [
+      defaultSnapOrigin,
+      {
+        method: 'connect',
+      },
+    ],
+  })) as string;
+  return address;
+};
+
+export const Transaction = async (transactionDetails: TransactionsInterface[]) => {
   await window.ethereum.request({
     method: 'wallet_invokeSnap',
     params: [
       defaultSnapOrigin,
       {
-        method: 'hello',
-      },
-    ],
-  });
-};
+        method: 'transaction',
+        params: {transaction: transactionDetails}
+      }
+    ]
+  })
+}
 
 export const isLocalSnap = (snapId: string) => snapId.startsWith('local:');

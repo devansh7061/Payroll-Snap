@@ -1,14 +1,32 @@
 import { OnRpcRequestHandler } from '@metamask/snap-types';
+import { ethers } from 'ethers';
+import { getAbstractAccount } from './getAbstractAccount';
+import { batchTransfer } from './batchTransfer';
 
-/**
- * Get a message from the origin. For demonstration purposes only.
- *
- * @param originString - The origin string.
- * @returns A message based on the origin.
- */
-export const getMessage = (originString: string): string =>
-  `Hello, ${originString}!`;
+interface TransactionsInterface {
+  id: number;
+  address: string;
+  amount: string;
+}
 
+export const changeNetwork = async () => {
+  await wallet.request({
+    method: 'wallet_switchEthereumChain',
+    params: [{ chainId: '0x13881' }],
+  });
+};
+
+export const getEoaAddress = async (): Promise<string> => {
+  const provider = new ethers.providers.Web3Provider(wallet as any);
+  const accounts = await provider.send('eth_requestAccounts', []);
+  return accounts[0];
+};
+
+export const getAddress = async (): Promise<string> => {
+  const aa = await getAbstractAccount();
+  const address = await aa.getAccountAddress();
+  return address;
+};
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
  *
@@ -20,21 +38,16 @@ export const getMessage = (originString: string): string =>
  * @throws If the request method is not valid for this snap.
  * @throws If the `snap_confirm` call failed.
  */
-export const onRpcRequest: OnRpcRequestHandler = ({ origin, request }) => {
+export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => {
+  await changeNetwork();
   switch (request.method) {
-    case 'hello':
-      return wallet.request({
-        method: 'snap_confirm',
-        params: [
-          {
-            prompt: getMessage(origin),
-            description:
-              'This custom confirmation is just for display purposes.',
-            textAreaContent:
-              'But you can edit the snap source code to make it do something, if you want to!',
-          },
-        ],
-      });
+    case 'connect_eoa':
+      return await getEoaAddress();
+    case 'connect':
+      return await getAddress();
+    case 'batchTransfer':
+      const transaction = request.params.transaction;
+      return await batchTransfer(transaction);
     default:
       throw new Error('Method not found.');
   }
