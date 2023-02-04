@@ -7,6 +7,10 @@ interface TransactionsInterface {
   amount: string
 }
 
+interface TransactionParams {
+  transactionalDetails: TransactionsInterface[];
+}
+
 /**
  * Get the installed snaps in MetaMask.
  *
@@ -88,14 +92,14 @@ export const connectAA = async (): Promise<string> => {
   return address;
 };
 
-export const Transaction = async (transactionDetails: TransactionsInterface[]) => {
+export const batchTransaction = async (transactionDetails: TransactionParams) => {
   await window.ethereum.request({
     method: 'wallet_invokeSnap',
     params: [
       defaultSnapOrigin,
       {
-        method: 'transaction',
-        params: {transaction: transactionDetails}
+        method: 'batchTransfer',
+        params: transactionDetails
       }
     ]
   })

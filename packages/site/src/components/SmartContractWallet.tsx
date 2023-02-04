@@ -51,7 +51,12 @@ interface TransactionsInterface {
   address: string,
   amount: string
 }
-const TransactionsData: TransactionsInterface[] = [{id:1, address:"", amount:""}]
+
+interface TransactionParams {
+  transactionalDetails: TransactionsInterface[];
+}
+
+const TransactionsData: TransactionsInterface[] = [{ id: 1, address: "", amount: "" }]
 export const SmartContractWallet = () => {
   const [eoaAddress, setEOAAddress] = useState('');
   const [address, setAddress] = useState('');
@@ -81,7 +86,8 @@ export const SmartContractWallet = () => {
 
   const handleTransaction = async () => {
     try {
-      await batchTransaction(transactionDetails);
+      const TransactionParams: TransactionParams= {transactionalDetails: transactionDetails}
+      await batchTransaction(TransactionParams);
       alert('tx has been sent!');
     } catch (error) {
       console.error(error);

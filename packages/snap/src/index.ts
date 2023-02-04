@@ -1,7 +1,7 @@
 import { OnRpcRequestHandler } from '@metamask/snap-types';
 import { ethers } from 'ethers';
 import { getAbstractAccount } from './getAbstractAccount';
-import { batchTransfer } from './batchTransfer';
+import { batchTransfer, isTransactionParams } from './batchTransfer';
 
 interface TransactionsInterface {
   id: number;
@@ -46,8 +46,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
     case 'connect':
       return await getAddress();
     case 'batchTransfer':
-      const transaction = request.params.transaction;
-      return await batchTransfer(transaction);
+      isTransactionParams(request.params)
+      return await batchTransfer(request.params);
     default:
       throw new Error('Method not found.');
   }
