@@ -1,12 +1,18 @@
 import { OnRpcRequestHandler } from '@metamask/snap-types';
 import { ethers } from 'ethers';
 import { getAbstractAccount } from './getAbstractAccount';
-import { batchTransfer, isTransactionParams } from './batchTransfer';
+import { batchTransfer, isTransactionParams, isAddressBook } from './batchTransfer';
+import { payrollTransfer } from './payrollTransfer';
 
-interface TransactionsInterface {
+interface Details {
   id: number;
-  address: string;
-  amount: string;
+  EmployeeAddress: string;
+  EmployeeName: string;
+  EmployeeCTC: string;
+}
+
+interface AddressBook {
+  addressBook: Details[]
 }
 
 export const changeNetwork = async () => {
@@ -27,6 +33,67 @@ export const getAddress = async (): Promise<string> => {
   const address = await aa.getAccountAddress();
   return address;
 };
+
+export const addEmployee = async (name: string, address: string, ctc: string) => {
+  let state = await wallet.request({
+    method: 'snap_manageState',
+    params: ['get'],
+  });
+
+  if (!state) {
+    const state: AddressBook = {"addressBook": []}
+    // initialize state if empty and set default data
+    await wallet.request({
+      method: 'snap_manageState',
+      params: ['update', state],
+    });
+  }
+  isAddressBook(state)
+  const oldState: Details[] = state.addressBook
+  const employeeId = oldState.length+1
+  const newState = [...oldState, {"id":employeeId,"EmployeeName": name, "EmployeeAddress": address, "EmployeeCTC": ctc}]
+  const updatedState: AddressBook = { "addressBook": newState }
+  console.log(newState);
+  await wallet.request({
+      method: 'snap_manageState', 
+      params: ['update', updatedState], 
+    }); 
+  return wallet.request({
+    method: 'snap_confirm',
+    params: [
+      {
+        prompt: "Employee Added",
+        description: "Your employee was added in your address book",
+        textAreaContent: `Name: ${name}\n` + `Address: ${address}\n` + `CTC: ${ctc}`
+      }
+    ]
+  })
+}
+
+export const showAddressBook = async () => {
+  let state = await wallet.request({
+    method: 'snap_manageState',
+    params: ['get']
+  })
+  if (!state) {
+    const state: AddressBook = {"addressBook": []}
+    // initialize state if empty and set default data
+    await wallet.request({
+      method: 'snap_manageState',
+      params: ['update', state],
+    });
+  }
+  isAddressBook(state);
+  const addressBook: Details[] = state.addressBook
+  return addressBook;
+}
+
+export const clearAddressBook = async () => {
+  await wallet.request({
+  method: 'snap_manageState',
+  params: ['clear'],
+});
+}
 /**
  * Handle incoming JSON-RPC requests, sent through `wallet_invokeSnap`.
  *
@@ -48,6 +115,18 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
     case 'batchTransfer':
       isTransactionParams(request.params)
       return await batchTransfer(request.params);
+    case 'payroll':
+      isAddressBook(request.params)
+      return await payrollTransfer(request.params);
+    case 'addEmployee':
+      const { employeeName, employeeAddress, employeeCTC } = request?.params as unknown as {
+        [key: string]: string;
+      };
+      return await addEmployee(employeeName, employeeAddress, employeeCTC);
+    case 'hello':
+      return await showAddressBook();
+    case 'clear':
+      return await clearAddressBook();
     default:
       throw new Error('Method not found.');
   }

@@ -11,6 +11,17 @@ interface TransactionParams {
   transactionalDetails: TransactionsInterface[];
 }
 
+interface Details {
+  id: number;
+  EmployeeAddress: string;
+  EmployeeName: string;
+  EmployeeCTC: string;
+}
+
+interface AddressBook {
+  addressBook: Details[]
+}
+
 /**
  * Get the installed snaps in MetaMask.
  *
@@ -92,14 +103,27 @@ export const connectAA = async (): Promise<string> => {
   return address;
 };
 
-export const batchTransaction = async (transactionDetails: TransactionParams) => {
+export const batchTransaction = async (transactionalDetails: TransactionParams) => {
   await window.ethereum.request({
     method: 'wallet_invokeSnap',
     params: [
       defaultSnapOrigin,
       {
         method: 'batchTransfer',
-        params: transactionDetails
+        params: transactionalDetails
+      }
+    ]
+  })
+}
+
+export const payrollTransaction = async (addressBook: AddressBook) => {
+  await window.ethereum.request({
+    method: 'wallet_invokeSnap',
+    params: [
+      defaultSnapOrigin,
+      {
+        method: 'payroll',
+        params: addressBook
       }
     ]
   })

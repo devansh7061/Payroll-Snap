@@ -46,6 +46,7 @@ const Title = styled.h2`
   margin-top: 0px;
   font-size: ${({ theme }) => theme.fontSizes.large};
 `;
+
 interface TransactionsInterface {
   id: number,
   address: string,

@@ -53,7 +53,11 @@
   "dependencies": {
     "@account-abstraction/contracts": "^0.4.0",
     "@account-abstraction/sdk": "^0.4.0",
+    "@emotion/react": "^11.10.5",
+    "@emotion/styled": "^11.10.5",
     "@ethersproject/providers": "^5.7.2",
+    "@mui/material": "^5.11.7",
+    "@mui/x-data-grid": "^5.17.22",
     "buffer": "^6.0.3"
   }
 }

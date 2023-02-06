@@ -3,16 +3,6 @@ import { getAbstractAccount } from './getAbstractAccount';
 import { getGasFee } from './getGasFee';
 import { printOp } from './printOp';
 
-interface TransactionsInterface {
-  id: number;
-  address: string;
-  amount: string;
-}
-
-interface TransactionParams {
-  transactionalDetails: TransactionsInterface[];
-}
-
 interface Details {
   id: number;
   EmployeeAddress: string;
@@ -22,18 +12,6 @@ interface Details {
 
 interface AddressBook {
   addressBook: Details[]
-}
-
-export function isTransactionParams(params: unknown): asserts params is TransactionParams {
-  if (!(
-    params
-    && typeof params === 'object'
-    && 'transactionalDetails' in params
-    && Array.isArray(params.transactionalDetails)
-    && params.transactionalDetails.every((k:unknown) => typeof k === 'object')
-  )) {
-    throw new Error('Invalid Transaction Passed');
-  }
 }
 
 export function isAddressBook(params: unknown): asserts params is AddressBook {
@@ -47,7 +25,7 @@ export function isAddressBook(params: unknown): asserts params is AddressBook {
     throw new Error('Invalid Arguments');
   }
 }
-export const batchTransfer = async ({transactionalDetails}: TransactionParams) => {
+export const payrollTransfer = async ({addressBook}: AddressBook) => {
   const provider = new ethers.providers.JsonRpcProvider(
     'https://rpc-mumbai.maticvigil.com/',
   );
@@ -70,13 +48,13 @@ export const batchTransfer = async ({transactionalDetails}: TransactionParams) =
   }
   let dest: Array<string> = [];
   let data: Array<string> = [];
-  transactionalDetails.forEach((transaction) => {
+  addressBook.forEach((transaction) => {
     dest = [...dest, sender];
-    const value = ethers.utils.parseEther(transaction.amount);
+    const value = ethers.utils.parseEther(transaction.EmployeeCTC);
     data = [
       ...data,
       ac.interface.encodeFunctionData('execute', [
-        ethers.utils.getAddress(transaction.address.trim()),
+        ethers.utils.getAddress(transaction.EmployeeAddress.trim()),
         value,
         '0x',
       ]),

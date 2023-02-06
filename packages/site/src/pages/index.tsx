@@ -14,6 +14,7 @@ import {
   Card,
 } from '../components';
 import { SmartContractWallet } from '../components/SmartContractWallet';
+import { AddressBook } from '../components/AddressBook';
 
 const Container = styled.div`
   display: flex;
@@ -156,7 +157,7 @@ const Index = () => {
           />
         )}
         
-        {state.installedSnap && <SmartContractWallet />}
+        {state.installedSnap && <AddressBook />}
       </CardContainer>
     </Container>
   );
