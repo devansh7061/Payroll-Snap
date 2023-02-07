@@ -22,6 +22,12 @@ export const changeNetwork = async () => {
   });
 };
 
+export const getBalance = async (address: string): Promise<string> => {
+  const provider = new ethers.providers.Web3Provider(wallet as any);
+  const balance = await provider.getBalance(address);
+  return ethers.utils.formatEther(balance);
+};
+
 export const getEoaAddress = async (): Promise<string> => {
   const provider = new ethers.providers.Web3Provider(wallet as any);
   const accounts = await provider.send('eth_requestAccounts', []);
@@ -115,6 +121,8 @@ export const onRpcRequest: OnRpcRequestHandler = async ({ origin, request }) => 
     case 'batchTransfer':
       isTransactionParams(request.params)
       return await batchTransfer(request.params);
+    case 'balance':
+      return await getBalance(await getAddress());
     case 'payroll':
       isAddressBook(request.params)
       return await payrollTransfer(request.params);

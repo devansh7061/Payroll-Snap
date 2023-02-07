@@ -103,6 +103,19 @@ export const connectAA = async (): Promise<string> => {
   return address;
 };
 
+export const getAABalance = async (): Promise<string> => {
+  const balance = (await window.ethereum.request({
+    method: 'wallet_invokeSnap',
+    params: [
+      defaultSnapOrigin,
+      {
+        method: 'balance',
+      },
+    ],
+  })) as string;
+  return balance;
+};
+
 export const batchTransaction = async (transactionalDetails: TransactionParams) => {
   await window.ethereum.request({
     method: 'wallet_invokeSnap',

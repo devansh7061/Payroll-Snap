@@ -9,8 +9,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { payrollTransaction } from '../utils';
-
+import { getAABalance,connectAA, payrollTransaction } from '../utils';
 
 const CardWrapper = styled.div<{ fullWidth?: boolean; disabled: boolean }>`
   display: flex;
@@ -32,7 +31,9 @@ const CardWrapper = styled.div<{ fullWidth?: boolean; disabled: boolean }>`
     padding: 1.6rem;
   }
 `;
-
+const Center = styled.div`
+  text-align: center;
+`;
 const AddressInput = styled.input`
   margin-top: 10px;
   font-size: 18px;
@@ -61,6 +62,9 @@ const Button = styled.button`
     width: 100%;
   }
 `;
+const Text = styled.div`
+  margin-bottom: 1.2rem;
+`;
 
 interface Details {
   id: number;
@@ -70,10 +74,12 @@ interface Details {
 }
 
 interface AddressBook {
-  addressBook: Details[]
+  addressBook: Details[];
 }
 
 export const AddressBook = () => {
+  const [address, setAddress] = useState('');
+  const [balance, setBalance] = useState('');
   const [employeeName, setEmployeeName] = useState('');
   const [employeeAddress, setEmployeeAddress] = useState('');
   const [employeeCTC, setEmployeeCTC] = useState('');
@@ -126,16 +132,26 @@ export const AddressBook = () => {
     }
   };
 
+  const handleConnectAAClick = async () => {
+    try {
+      setAddress(await connectAA());
+      setBalance(await getAABalance());
+    } catch (e) {
+      console.error(e);
+      dispatch({ type: MetamaskActions.SetError, payload: e });
+    }
+  };
+
   const handleTransaction = async () => {
     try {
-      const TransactionParams: AddressBook= {addressBook: addressBook}
+      const TransactionParams: AddressBook = { addressBook: addressBook };
       await payrollTransaction(TransactionParams);
       alert('tx has been sent!');
     } catch (error) {
       console.error(error);
       dispatch({ type: MetamaskActions.SetError, payload: error });
     }
-  }
+  };
 
   const handleClearSnap = async () => {
     try {
@@ -155,69 +171,101 @@ export const AddressBook = () => {
     }
   };
   useEffect(() => {
-    showAddressBook();
+    {address && showAddressBook() } 
   }, [toggle]);
   return (
     <>
-      <CardWrapper fullWidth={true} disabled={false}>
-        <Title>Add your employees to Address Book!</Title>
-        <AddressOwner
-          type="text"
-          placeholder="Name"
-          onChange={(event) => setEmployeeName(event.currentTarget.value)}
-          value={employeeName}
-        />
-        <AddressInput
-          type="text"
-          placeholder="Address"
-          onChange={(event) => setEmployeeAddress(event.currentTarget.value)}
-          value={employeeAddress}
-        />
-        <AddressCTC
-          type="text"
-          placeholder="CTC"
-          onChange={(event) => setEmployeeCTC(event.currentTarget.value)}
-          value={employeeCTC}
-        />
-        <br></br>
-        <Button
-          onClick={() =>
-            handleAddEmployee(employeeName, employeeAddress, employeeCTC)
-          }
-        >
-          Submit
-        </Button>
-        <br></br>
-        <Button onClick={handleClearSnap}>Clear Address Book</Button>
-        <br></br>
-      </CardWrapper>
-      <CardWrapper fullWidth={true} disabled={false}>
-        <Title>Send salary to all your employees in a single click!</Title>
-        <TableContainer component={Paper}>
-          <Table sx={{ minWidth: 450 }} aria-label="simple table">
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ fontSize: "15px" }}>Employee's Name</TableCell>
-                <TableCell sx={{ fontSize: "15px" }}>Employee's Address</TableCell>
-                <TableCell sx={{ fontSize: "15px" }}>Employee's CTC</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {addressBook.map((employee) => {
-                return (
+      {!address && (
+        <CardWrapper fullWidth={true} disabled={false}>
+          <Center>
+            <Button onClick={handleConnectAAClick}>
+              Create Abstract Account
+            </Button>
+          </Center>
+        </CardWrapper>
+      )}
+      {address && (
+        <>
+          <CardWrapper fullWidth={true} disabled={false}>
+            <Title>Your Abstract Account</Title>
+            <Text>Address: {address}</Text>
+            <Text>Balance: {balance }</Text>
+          </CardWrapper>
+          <CardWrapper fullWidth={true} disabled={false}>
+            <Title>Add your employees to Address Book!</Title>
+            <AddressOwner
+              type="text"
+              placeholder="Name"
+              onChange={(event) => setEmployeeName(event.currentTarget.value)}
+              value={employeeName}
+            />
+            <AddressInput
+              type="text"
+              placeholder="Address"
+              onChange={(event) =>
+                setEmployeeAddress(event.currentTarget.value)
+              }
+              value={employeeAddress}
+            />
+            <AddressCTC
+              type="text"
+              placeholder="CTC"
+              onChange={(event) => setEmployeeCTC(event.currentTarget.value)}
+              value={employeeCTC}
+            />
+            <br></br>
+            <Button
+              onClick={() =>
+                handleAddEmployee(employeeName, employeeAddress, employeeCTC)
+              }
+            >
+              Submit
+            </Button>
+            <br></br>
+            <Button onClick={handleClearSnap}>Clear Address Book</Button>
+            <br></br>
+          </CardWrapper>
+          <CardWrapper fullWidth={true} disabled={false}>
+            <Title>Send salary to all your employees in a single click!</Title>
+            <TableContainer component={Paper}>
+              <Table sx={{ minWidth: 450 }} aria-label="simple table">
+                <TableHead>
                   <TableRow>
-                    <TableCell sx={{ fontSize: "15px" }}>{employee.EmployeeName}</TableCell>
-                    <TableCell sx={{ fontSize: "15px" }}>{employee.EmployeeAddress}</TableCell>
-                    <TableCell sx={{ fontSize: "15px" }}>{employee.EmployeeCTC }</TableCell>
+                    <TableCell sx={{ fontSize: '15px' }}>
+                      Employee's Name
+                    </TableCell>
+                    <TableCell sx={{ fontSize: '15px' }}>
+                      Employee's Address
+                    </TableCell>
+                    <TableCell sx={{ fontSize: '15px' }}>
+                      Employee's CTC
+                    </TableCell>
                   </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <br></br>
-        <Button onClick={handleTransaction}>Run Payroll</Button>
-      </CardWrapper>
+                </TableHead>
+                <TableBody>
+                  {addressBook.map((employee) => {
+                    return (
+                      <TableRow>
+                        <TableCell sx={{ fontSize: '15px' }}>
+                          {employee.EmployeeName}
+                        </TableCell>
+                        <TableCell sx={{ fontSize: '15px' }}>
+                          {employee.EmployeeAddress}
+                        </TableCell>
+                        <TableCell sx={{ fontSize: '15px' }}>
+                          {employee.EmployeeCTC}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <br></br>
+            <Button onClick={handleTransaction}>Run Payroll</Button>
+          </CardWrapper>
+        </>
+      )}
     </>
   );
 };

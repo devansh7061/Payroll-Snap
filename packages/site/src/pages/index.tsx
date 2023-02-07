@@ -100,6 +100,10 @@ const ErrorMessage = styled.div`
   }
 `;
 
+const Center = styled.div`
+  text-align: center;
+`;
+
 const Index = () => {
   const [state, dispatch] = useContext(MetaMaskContext);
 
@@ -153,6 +157,7 @@ const Index = () => {
                 />
               ),
             }}
+            fullWidth
             disabled={!state.isFlask}
           />
         )}
