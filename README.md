@@ -19,12 +19,6 @@ To run server:
 ```shell
 cd packages/server
 ```
-Create a `.env` file here and add the following:
-```shell
-RPC_ENDPOINT=
-BUNDLER_URL=
-ENTRY_POINT_ADDRESS=
-```
 Run the server using the following command:
 ```shell
 yarn install && yarn run dev
