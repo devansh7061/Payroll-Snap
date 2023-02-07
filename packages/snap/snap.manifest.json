@@ -1,10 +1,10 @@
 {
   "version": "0.1.0",
-  "description": "An example Snap written in TypeScript.",
-  "proposedName": "TypeScript Example Snap",
+  "description": "Payroll management using Account Abstraction on MetaMask",
+  "proposedName": "Pay Snap",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MetaMask/template-snap-monorepo.git"
+    "url": "https://github.com/devansh7061/Payroll-Snap"
   },
   "source": {
     "shasum": "JlMi916+QcCzLmtvDUp0gEy4lRMTpw0cKINsenb9Nis=",
@@ -12,7 +12,7 @@
       "npm": {
         "filePath": "dist/bundle.js",
         "iconPath": "images/icon.svg",
-        "packageName": "snap",
+        "packageName": "@devansh7061/paysnap",
         "registry": "https://registry.npmjs.org/"
       }
     }
