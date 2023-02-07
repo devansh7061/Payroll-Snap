@@ -125,7 +125,7 @@ const Index = () => {
   return (
     <Container>
       <Heading>
-        Welcome to <Span>template-snap</Span>
+        Welcome to <Span>Pay-snap</Span>
       </Heading>
       <CardContainer>
         {state.error && (

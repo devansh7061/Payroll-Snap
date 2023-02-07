@@ -136,6 +136,7 @@ export const AddressBook = () => {
     try {
       setAddress(await connectAA());
       setBalance(await getAABalance());
+      showAddressBook();
     } catch (e) {
       console.error(e);
       dispatch({ type: MetamaskActions.SetError, payload: e });
